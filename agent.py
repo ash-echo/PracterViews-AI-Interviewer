@@ -10,6 +10,7 @@ from prompts import INTERVIEW_PROMPTS
 from livekit.plugins import tavus
 import os
 import json
+import asyncio
 
 load_dotenv(".env")
 
@@ -38,33 +39,28 @@ async def my_agent(ctx: agents.JobContext):
             elif item.role == "user" and item.text_content:
                 print(f"User: {item.text_content}")
 
-    # Determine interview type from participant metadata
-    interview_type = "default"
+    # Determine interview type from ROOM NAME!
+    # Room names are like "devops-interview", "frontend-interview", etc.
+    room_name = ctx.room.name
+    print(f"[AGENT] Connected to room: {room_name}")
     
-    # Check existing participants (if any)
-    for p in ctx.room.remote_participants.values():
-        if p.metadata:
-            try:
-                meta = json.loads(p.metadata)
-                if "type" in meta:
-                    interview_type = meta["type"]
-                    print(f"Found existing participant with type: {interview_type}")
-                    break
-            except:
-                pass
-
-    # Also listen for new participants joining (in case agent joins first)
-    @session.on("participant_joined")
-    def on_participant_joined(participant: rtc.RemoteParticipant):
-        nonlocal interview_type
-        if participant.metadata:
-            try:
-                meta = json.loads(participant.metadata)
-                if "type" in meta:
-                    interview_type = meta["type"]
-                    print(f"Participant joined with type: {interview_type}")
-            except:
-                pass
+    # Extract type from room name (e.g., "devops-interview" -> "devops")
+    if "-interview" in room_name:
+        interview_type = room_name.replace("-interview", "")
+        print(f"[AGENT] Extracted interview type from room name: {interview_type}")
+    else:
+        interview_type = "default"
+        print(f"[AGENT] Could not extract type from room name, using default")
+    
+    # Validate that this type exists in our prompts
+    if interview_type not in INTERVIEW_PROMPTS:
+        print(f"[AGENT] Interview type '{interview_type}' not found in prompts, falling back to default")
+        interview_type = "default"
+    
+    print(f"[AGENT] Final interview type: {interview_type}")
+    
+    # Create assistant with the correct type
+    assistant = Assistant(interview_type=interview_type)
 
     avatar = tavus.AvatarSession(
         replica_id=os.environ.get("REPLICA_ID"),
@@ -75,20 +71,24 @@ async def my_agent(ctx: agents.JobContext):
     try:
         await avatar.start(session, room=ctx.room)
     except Exception as e:
-        print(f"Avatar failed to start: {e}")
+        print(f"[AGENT] Avatar failed to start: {e}")
 
+    print(f"[AGENT] Starting session with interview type: {interview_type}")
+    
     await session.start(
         room=ctx.room,
-        agent=Assistant(interview_type=interview_type),
+        agent=assistant,
         room_options=room_io.RoomOptions(
             audio_input=room_io.AudioInputOptions(
                 noise_cancellation=lambda params: noise_cancellation.BVCTelephony() if params.participant.kind == rtc.ParticipantKind.PARTICIPANT_KIND_SIP else noise_cancellation.BVC(),
             ),
         ),
     )
-
+    
+    print(f"[AGENT] Generating greeting for interview type: {interview_type}")
+    
     await session.generate_reply(
-        instructions="Greet the candidate professionally based on the context of the interview. You should only primary speak in english and speak in other languages only when the user asks you to do so."
+        instructions="Follow your system instructions exactly. Start with the OPENING statement defined in your instructions."
     )
 
 

@@ -1,14 +1,14 @@
-import os
-from http.server import HTTPServer, BaseHTTPRequestHandler
-import json
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from livekit import api
+import json
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-LIVEKIT_URL = os.getenv("LIVEKIT_URL")
-LIVEKIT_API_KEY = os.getenv("LIVEKIT_API_KEY")
-LIVEKIT_API_SECRET = os.getenv("LIVEKIT_API_SECRET")
+LIVEKIT_URL = os.environ.get("LIVEKIT_URL")
+LIVEKIT_API_KEY = os.environ.get("LIVEKIT_API_KEY")
+LIVEKIT_API_SECRET = os.environ.get("LIVEKIT_API_SECRET")
 
 class TokenHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -36,13 +36,19 @@ class TokenHandler(BaseHTTPRequestHandler):
 
                 # Create metadata JSON
                 metadata = json.dumps({"type": interview_type})
+                
+                # Generate room name based on interview type
+                # This makes it easier for the agent to know the context!
+                room_name = f"{interview_type}-interview"
+                
+                print(f"[TOKEN_SERVER] Generating token for room: {room_name}, type: {interview_type}")
 
                 token.with_identity(participant_identity) \
                     .with_name(participant_name) \
                     .with_metadata(metadata) \
                     .with_grants(api.VideoGrants(
                         room_join=True,
-                        room="playground-8sOe-iyTl", 
+                        room=room_name,  # Dynamic room based on type!
                     ))
 
                 jwt_token = token.to_jwt()
@@ -56,22 +62,23 @@ class TokenHandler(BaseHTTPRequestHandler):
                     "token": jwt_token,
                     "url": LIVEKIT_URL,
                     "identity": participant_identity,
-                    "type": interview_type
+                    "type": interview_type,
+                    "room": room_name
                 }
                 self.wfile.write(json.dumps(response).encode())
             except Exception as e:
+                print(f"Error generating token: {str(e)}")
                 self.send_response(500)
+                self.send_header('Content-type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.end_headers()
-                self.wfile.write(json.dumps({"error": str(e)}).encode())
-        else:
-            self.send_response(404)
-            self.end_headers()
+                error_response = {"error": str(e)}
+                self.wfile.write(json.dumps(error_response).encode())
 
 def run(server_class=HTTPServer, handler_class=TokenHandler, port=3000):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print(f"Token server running on port {port}")
+    print(f'Token server running on port {port}')
     httpd.serve_forever()
 
 if __name__ == '__main__':

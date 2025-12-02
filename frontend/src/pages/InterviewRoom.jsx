@@ -67,7 +67,7 @@ const ParticipantTile = ({ track, participant, isLocal }) => {
             )}
 
             <div className="absolute bottom-4 left-4 bg-black/50 px-3 py-1 rounded-full text-sm">
-                {isLocal ? "Adrian (You)" : "AI Interviewer"}
+                {isLocal ? "(You)" : "AI Interviewer"}
             </div>
         </div>
     );
@@ -119,7 +119,7 @@ const RoomContent = () => {
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                         <span className="text-black font-bold">P</span>
                     </div>
-                    <span className="text-xl font-bold">PrepWise</span>
+                    <span className="text-xl font-bold">PracterViews</span>
                 </div>
                 <div className="text-sm text-gray-400">Interview in progress</div>
             </header>

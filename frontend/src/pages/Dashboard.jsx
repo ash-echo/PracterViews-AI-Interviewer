@@ -76,10 +76,7 @@ const Dashboard = () => {
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                         <span className="text-black font-bold">P</span>
                     </div>
-                    <span className="text-xl font-bold">PrepWise</span>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gray-700 overflow-hidden">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
+                    <span className="text-xl font-bold">PracterViews</span>
                 </div>
             </header>
 
@@ -100,12 +97,6 @@ const Dashboard = () => {
                 <div className="absolute right-10 bottom-0 w-1/3 opacity-80 hidden md:block">
                     <div className="text-9xl">🤖</div>
                 </div>
-            </div>
-
-            {/* Your Interviews Section */}
-            <div className="mb-12">
-                <h2 className="text-2xl font-bold mb-4">Your Interviews</h2>
-                <p className="text-gray-400">You haven't taken any interviews yet</p>
             </div>
 
             {/* Take Interviews Section */}
