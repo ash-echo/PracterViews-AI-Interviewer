@@ -120,7 +120,7 @@ Built using **React 18 + Vite**, animated with **Framer Motion**, and styled usi
 
 ---
 
-# 🚀 Deployment Protocol
+#  Deployment Protocol
 
 ## Phase 1 — Environment Injection
 
@@ -182,7 +182,7 @@ npm run dev
 
 ---
 
-# 🔮 Future Roadmap
+#  Future Roadmap
 
 - [ ] Emotion recognition in real time  
 - [ ] Collaborative AI code editor  
@@ -192,7 +192,7 @@ npm run dev
 
 ---
 
-# 🤝 Contributing
+#  Contributing
 
 We welcome contributions that improve:
 
