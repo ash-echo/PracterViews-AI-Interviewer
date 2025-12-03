@@ -1,9 +1,7 @@
 # 🚀 PracterViews: The Future of AI Interviewing  
 
-![PracterViews Banner](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge&color=00ff00)  
-![AI](https://img.shields.io/badge/AI-Gemini%202.0-blue?style=for-the-badge&logo=google&logoColor=white)  
-![Realtime](https://img.shields.io/badge/Latency-Ultra%20Low-red?style=for-the-badge)  
-![Experience](https://img.shields.io/badge/UX-Premium-purple?style=for-the-badge)
+![PracterViews Banner](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge&color=00ff00) ![AI](https://img.shields.io/badge/AI-Gemini%202.0-blue?style=for-the-badge&logo=google&logoColor=white) ![Realtime](https://img.shields.io/badge/Latency-Ultra%20Low-red?style=for-the-badge) ![Experience](https://img.shields.io/badge/UX-Premium-purple?style=for-the-badge)
+
 
 > **“The most advanced, resilient, and immersive interview simulation platform ever built.”**
 
@@ -208,7 +206,3 @@ We welcome contributions that improve:
 # 📄 License
 
 MIT License — free to use, modify, and distribute.
-
----
-
-# ✨ Built with 💻, ☕, and a tiny bit of ✨ by the PracterViews Team.
