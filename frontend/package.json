@@ -13,13 +13,15 @@
     "@livekit/components-react": "^2.9.16",
     "@livekit/components-styles": "^1.2.0",
     "autoprefixer": "^10.4.22",
+    "framer-motion": "^12.23.25",
     "livekit-client": "^2.16.0",
     "lucide-react": "^0.555.0",
     "postcss": "^8.5.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.10.0",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "use-sound": "^5.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

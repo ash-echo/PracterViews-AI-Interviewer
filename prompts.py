@@ -93,6 +93,16 @@ OPENING: Start by asking: "Hello and welcome. What role are you interviewing for
 Based on their answer, tailor your questions accordingly.
     """,
     
+    "hackathon": BASE_SYSTEM_PROMPT + """
+    
+ROLE CONTEXT: Hackathon Project Judge / Reviewer
+FOCUS AREAS: Innovation, Technical Complexity, Real-world Impact, Pitch Delivery, Future Scalability.
+
+OPENING: Start by saying: "Welcome. I am here to review your hackathon project. Please pitch your idea in 2 minutes and tell me about the core technical challenges you solved."
+
+Then proceed with questions about their tech stack, implementation details, and business viability.
+    """,
+
     "default": BASE_SYSTEM_PROMPT + """
     
 ROLE CONTEXT: General Interview (Role to be determined)
