@@ -21,24 +21,23 @@ class TokenHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith('/getToken'):
             try:
-                # Parse query parameters
+                
                 from urllib.parse import urlparse, parse_qs
                 query_components = parse_qs(urlparse(self.path).query)
                 interview_type = query_components.get('type', ['default'])[0]
 
-                # Create a token
+                
                 token = api.AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET)
                 
-                # Give the user a random identity and name
+                
                 import uuid
                 participant_identity = f"user-{str(uuid.uuid4())[:8]}"
                 participant_name = "Candidate"
 
-                # Create metadata JSON
+                
                 metadata = json.dumps({"type": interview_type})
                 
-                # Generate room name based on interview type
-                # This makes it easier for the agent to know the context!
+              
                 room_name = f"{interview_type}-interview"
                 
                 print(f"[TOKEN_SERVER] Generating token for room: {room_name}, type: {interview_type}")
@@ -48,7 +47,7 @@ class TokenHandler(BaseHTTPRequestHandler):
                     .with_metadata(metadata) \
                     .with_grants(api.VideoGrants(
                         room_join=True,
-                        room=room_name,  # Dynamic room based on type!
+                        room=room_name,  
                     ))
 
                 jwt_token = token.to_jwt()
