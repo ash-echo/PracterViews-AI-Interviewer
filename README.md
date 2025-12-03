@@ -21,16 +21,16 @@ graph TD
     classDef ai fill:#2d3748,stroke:#f6e05e,stroke-width:2px,color:white;
     classDef cloud fill:#2d3748,stroke:#48bb78,stroke-width:2px,color:white;
 
-    User([👤 CANDIDATE]) ::: user
+    User([👤 CANDIDATE])
     
     subgraph Cloud_Layer [☁️ GLOBAL REAL-TIME NETWORK]
-        LK[⚡ LiveKit Edge Network] ::: cloud
+        LK[⚡ LiveKit Edge Network]
     end
 
     subgraph Client_Layer [💻 IMMERSIVE FRONTEND]
-        Dashboard[📱 Holo-Dashboard] ::: frontend
-        Room[🎥 4K Interview Room] ::: frontend
-        Visualizer[📊 Audio Visualizer] ::: frontend
+        Dashboard[📱 Holo-Dashboard]
+        Room[🎥 4K Interview Room]
+        Visualizer[📊 Audio Visualizer]
     end
     
     subgraph Core_Layer [🧠 NEURAL BACKEND]
@@ -67,19 +67,6 @@ graph TD
     class User user
     class Dashboard,Room,Visualizer frontend
     class Agent,TokenServer backend
-    class Gemini,Tavus,Bey ai
-    class LK cloud
-```
-
----
-
-## 💎 Features That Defy Expectations
-
-### 🧠 **Hyper-Contextual Intelligence**
-Powered by **Google Gemini 2.0 Flash**, the agent doesn't just ask questions—it *understands* nuance.
-*   **Dynamic Role Adaptation**: Instantly shifts persona from a strict **DevOps Engineer** to an empathetic **HR Manager**.
-*   **Hackathon Judge Mode**: A specialized module designed to critique pitches, analyze innovation, and stress-test technical viability.
-
 ### 🛡️ **Unbreakable "Immortal" Fallback System**
 We engineered a system that **cannot fail**.
 *   **Primary Core**: Uses **Tavus** for cinema-quality video generation.
