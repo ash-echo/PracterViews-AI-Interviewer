@@ -12,6 +12,7 @@ load_dotenv(".env")
 
 class Assistant(Agent):
     def __init__(self) -> None:
+        #demo change
         super().__init__(instructions=SYSTEM_PROMPT)
 
 server = AgentServer()
