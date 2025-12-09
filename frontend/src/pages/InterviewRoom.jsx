@@ -326,7 +326,7 @@ const RoomContent = () => {
                         `}
                     >
                         <FileText className="w-4 h-4" />
-                        <span>Context Data</span>
+                        <span>Assets</span>
                     </motion.button>
                 </div>
             </header>
