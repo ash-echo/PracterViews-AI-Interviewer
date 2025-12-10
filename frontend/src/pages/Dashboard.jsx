@@ -191,10 +191,7 @@ const Dashboard = () => {
                 {/* HUD Header */}
                 <header className="flex justify-between items-center mb-16 md:mb-24 animate-enter border-b border-white/5 pb-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center relative group overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-20 group-hover:opacity-40 transition-opacity" />
-                            <Zap className="w-5 h-5 text-indigo-400 fill-current" />
-                        </div>
+                        <img src="/logo.svg" alt="PracterViews Logo" className="w-8 h-8" />
                         <h1 className="text-2xl font-display font-bold tracking-tight text-white">
                             Practer<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Views</span>
                         </h1>
@@ -228,7 +225,7 @@ const Dashboard = () => {
                     <h2 className="text-6xl md:text-8xl font-display font-bold mb-8 tracking-tighter leading-[0.9]">
                         CRACK THE <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-white/50 animate-text-shimmer bg-[length:200%_auto]">
-                            INTERVIEW CODE.
+                            INTERVIEW
                         </span>
                     </h2>
 
@@ -295,7 +292,7 @@ const Dashboard = () => {
                     </div>
                 </section>
             </main>
-        </motion.div>
+        </motion.div >
     );
 };
 
