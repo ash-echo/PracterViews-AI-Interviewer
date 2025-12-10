@@ -526,7 +526,11 @@ function solution() {
                         ...prev,
                         [data.phase]: data.score
                     }));
-                    setReceivedScores(prev => prev + 1); // Count received scores
+                    // Track which phases have been scored (not just count)
+                    setReceivedScores(prev => ({
+                        ...prev,
+                        [data.phase]: true
+                    }));
                 }
             } catch (error) {
                 console.error('Error parsing data:', error);
@@ -592,7 +596,7 @@ function solution() {
 
     // State for waiting on phase scores
     const [waitingForScores, setWaitingForScores] = useState(false);
-    const [receivedScores, setReceivedScores] = useState(0); // Count of received scores
+    const [receivedScores, setReceivedScores] = useState({ resume: false, github: false, topic: false }); // Track which phases scored
     const waitingForScoresRef = React.useRef(false); // Ref to track in timeout
 
     // Handle closing analysis popup - waits for scores then shows report
@@ -601,7 +605,7 @@ function solution() {
         setShowIDE(false);
         setWaitingForScores(true);
         waitingForScoresRef.current = true;
-        setReceivedScores(0); // Reset counter
+        setReceivedScores({ resume: false, github: false, topic: false }); // Reset tracker
 
         console.log('[FRONTEND] Waiting for phase scores before showing report...');
 
@@ -615,21 +619,13 @@ function solution() {
                 { reliable: true }
             );
         }
-
-        // Timeout fallback after 20 seconds
-        setTimeout(() => {
-            if (waitingForScoresRef.current) {
-                console.log('[FRONTEND] Timeout waiting for scores, showing report anyway');
-                waitingForScoresRef.current = false;
-                setWaitingForScores(false);
-                setInterviewPhase('report');
-            }
-        }, 20000);
+        // No timeout - wait indefinitely for all 3 scores
     };
 
     // Listen for phase scores and show report when all 3 received
     useEffect(() => {
-        if (waitingForScores && receivedScores >= 3) {
+        const allReceived = receivedScores.resume && receivedScores.github && receivedScores.topic;
+        if (waitingForScores && allReceived) {
             console.log('[FRONTEND] All 3 scores received, showing report now');
             waitingForScoresRef.current = false;
             setWaitingForScores(false);
@@ -652,14 +648,14 @@ function solution() {
                         <h2 className="text-2xl font-bold text-white mb-2">Generating Your Report</h2>
                         <p className="text-gray-400 mb-4">Analyzing your interview performance...</p>
                         <div className="flex justify-center gap-4 text-sm">
-                            <span className={`px-3 py-1 rounded-full ${phaseScores.resume > 0 ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
-                                📄 Resume {phaseScores.resume > 0 ? '✓' : '...'}
+                            <span className={`px-3 py-1 rounded-full ${receivedScores.resume ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
+                                📄 Resume {receivedScores.resume ? '✓' : '...'}
                             </span>
-                            <span className={`px-3 py-1 rounded-full ${phaseScores.github > 0 ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
-                                💻 GitHub {phaseScores.github > 0 ? '✓' : '...'}
+                            <span className={`px-3 py-1 rounded-full ${receivedScores.github ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
+                                💻 GitHub {receivedScores.github ? '✓' : '...'}
                             </span>
-                            <span className={`px-3 py-1 rounded-full ${phaseScores.topic > 0 ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
-                                🎯 Topic {phaseScores.topic > 0 ? '✓' : '...'}
+                            <span className={`px-3 py-1 rounded-full ${receivedScores.topic ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
+                                🎯 Topic {receivedScores.topic ? '✓' : '...'}
                             </span>
                         </div>
                     </div>
