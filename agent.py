@@ -131,7 +131,7 @@ async def my_agent(ctx: agents.JobContext):
             if data_type == "RESUME_DATA":
                 print(f"[AGENT] Processing resume data...")
                 # Inject resume context into the session
-                asyncio.create_task(session.generate_reply(
+                session.generate_reply(
                     instructions=f"""The candidate has shared their resume. Here is the content:
 
 --- RESUME START ---
@@ -139,12 +139,12 @@ async def my_agent(ctx: agents.JobContext):
 --- RESUME END ---
 
 Acknowledge that you received their resume and ask a specific question about something mentioned in it (a technology, project, or experience). Be specific - reference actual content from the resume."""
-                ))
+                )
                 
             elif data_type == "GITHUB_DATA":
                 print(f"[AGENT] Processing GitHub data...")
                 # Inject GitHub context into the session
-                asyncio.create_task(session.generate_reply(
+                session.generate_reply(
                     instructions=f"""The candidate has shared their GitHub profile. Here is the summary:
 
 --- GITHUB PROFILE ---
@@ -152,7 +152,99 @@ Acknowledge that you received their resume and ask a specific question about som
 --- GITHUB END ---
 
 Acknowledge that you reviewed their GitHub and ask about a specific repository or project mentioned. Be specific - reference actual repos or technologies from the data."""
-                ))
+                )
+            
+            elif data_type == "CODE_ANALYSIS":
+                # Use Gemini to analyze the submitted code
+                code = payload.get("code", "")
+                question = payload.get("question", {})
+                question_title = question.get("title", "Coding Problem")
+                question_desc = question.get("description", "")
+                
+                print(f"[AGENT] Analyzing code with AI for: {question_title}")
+                
+                # Define async helper for code analysis
+                async def perform_code_analysis():
+                    analysis_prompt = f"""You are a code reviewer. Analyze this code submission and return a JSON response.
+
+QUESTION: {question_title}
+DESCRIPTION: {question_desc}
+
+SUBMITTED CODE:
+```
+{code}
+```
+
+Analyze the code and return ONLY a valid JSON object (no markdown, no explanation) with this structure:
+{{
+    "overallScore": <0-100>,
+    "verdict": "<Excellent/Good/Needs Work/Incomplete/Failed>",
+    "summary": "<2 sentence summary of the submission>",
+    "logic": {{"score": <0-100>, "feedback": "<1 sentence>"}},
+    "edgeCases": {{"score": <0-100>, "feedback": "<1 sentence>"}},
+    "efficiency": {{"score": <0-100>, "feedback": "<1 sentence>"}},
+    "readability": {{"score": <0-100>, "feedback": "<1 sentence>"}},
+    "suggestions": ["<suggestion 1>", "<suggestion 2>"]
+}}
+
+SCORING RULES:
+- Empty/unchanged code = 0 score
+- No return statement = max 20 score  
+- Code that doesn't solve the problem = max 30 score
+- Partial solution = 30-60 score
+- Working solution with issues = 60-80 score
+- Good solution = 80-100 score
+
+Return ONLY the JSON, nothing else."""
+
+                    try:
+                        import google.generativeai as genai
+                        genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+                        model = genai.GenerativeModel('gemini-2.5-flash')
+                        response = model.generate_content(analysis_prompt)
+                        
+                        # Parse the JSON response
+                        response_text = response.text.strip()
+                        # Remove markdown code blocks if present
+                        if response_text.startswith("```"):
+                            response_text = response_text.split("```")[1]
+                            if response_text.startswith("json"):
+                                response_text = response_text[4:]
+                        response_text = response_text.strip()
+                        
+                        analysis_result = json.loads(response_text)
+                        print(f"[AGENT] AI Analysis complete. Score: {analysis_result.get('overallScore', 0)}")
+                        
+                        # Send result back to frontend
+                        await ctx.room.local_participant.publish_data(
+                            json.dumps({
+                                "type": "CODE_ANALYSIS_RESULT",
+                                "result": analysis_result
+                            }).encode(),
+                            reliable=True
+                        )
+                    except Exception as e:
+                        print(f"[AGENT] Code analysis error: {e}")
+                        # Send fallback result
+                        await ctx.room.local_participant.publish_data(
+                            json.dumps({
+                                "type": "CODE_ANALYSIS_RESULT",
+                                "result": {
+                                    "overallScore": 0,
+                                    "verdict": "Analysis Error",
+                                    "summary": "Unable to analyze code. Please try again.",
+                                    "logic": {"score": 0, "feedback": "Error during analysis"},
+                                    "edgeCases": {"score": 0, "feedback": "Error during analysis"},
+                                    "efficiency": {"score": 0, "feedback": "Error during analysis"},
+                                    "readability": {"score": 0, "feedback": "Error during analysis"},
+                                    "suggestions": ["Check your code and try again"]
+                                }
+                            }).encode(),
+                            reliable=True
+                        )
+                
+                # Execute the async helper
+                asyncio.create_task(perform_code_analysis())
             
             elif data_type == "CODE_FEEDBACK":
                 print(f"[AGENT] Speaking code feedback to candidate...")
@@ -167,7 +259,7 @@ Acknowledge that you reviewed their GitHub and ask about a specific repository o
                 if suggestions:
                     suggestions_text = "Here are my suggestions for improvement: " + ". ".join(suggestions[:3])
                 
-                asyncio.create_task(session.generate_reply(
+                session.generate_reply(
                     instructions=f"""You just reviewed the candidate's code submission. Speak naturally as if you're giving verbal feedback.
 
 CODE EVALUATION RESULTS:
@@ -182,10 +274,10 @@ INSTRUCTIONS FOR YOUR RESPONSE:
 3. Explain the main feedback points briefly (don't read word for word, paraphrase naturally)
 4. If score is low (below 30), be encouraging but honest about what needs work
 5. If score is medium (30-70), highlight what they did well and what to improve
-6. If score is high (70+), congratulate them and mention minor improvements
-7. End by asking if they want to try again or move to the next question
-8. Keep your response under 30 seconds of speaking time - be concise!"""
-                ))
+6. If score is high (70+), congratulate them warmly
+7. End by saying they can now view their final report - this concludes the coding portion
+8. Keep your response under 20 seconds of speaking time - be concise!"""
+                )
             
             elif data_type == "PHASE_CHANGE":
                 phase = payload.get("phase", "")
@@ -227,28 +319,28 @@ Wait for their response, then provide constructive feedback if they say yes."""
                 
                 instruction = phase_instructions.get(phase, "Continue the interview. Ask the candidate a relevant question now.")
                 print(f"[AGENT] Sending phase instruction for: {phase}")
-                asyncio.create_task(session.generate_reply(instructions=instruction))
+                session.generate_reply(instructions=instruction)
                 
             elif data_type == "INTERVIEW_SKIPPED":
                 print(f"[AGENT] Interview skipped by candidate")
-                asyncio.create_task(session.generate_reply(
+                session.generate_reply(
                     instructions="""The candidate has chosen to skip to the final report. 
                     
 Acknowledge this choice politely but note that skipping sections will result in a score of 0. 
 Say something like: "I see you've chosen to skip ahead. That's completely fine - I'll prepare your report now. Do keep in mind that skipped sections won't be scored. Thank you for your time today!"
 
 Keep it brief and non-judgmental."""
-                ))
+                )
             
             elif data_type == "INTERVIEW_COMPLETE":
                 print(f"[AGENT] Interview complete - showing final report")
-                asyncio.create_task(session.generate_reply(
-                    instructions="""START SPEAKING NOW. The interview is complete and the candidate can see their final report.
+                session.generate_reply(
+                    instructions="""START SPEAKING NOW. The interview is officially complete.
 
-Say: "Congratulations on completing the interview! You can now see your performance report on screen. I hope you found this experience valuable. Feel free to review your scores and feedback, and when you're ready, you can leave the interview by clicking the End Call button. Best of luck with your future endeavors! Thank you for your time today."
+Say: "That wraps up our interview! Your complete performance report is now on screen. Thank you for participating today. You can review your scores and then click the End Call button when you're ready to leave. Good luck with everything!"
 
-Keep the tone warm and encouraging."""
-                ))
+Keep it brief and warm - the interview is done."""
+                )
                 
         except Exception as e:
             print(f"[AGENT] Error processing received data: {e}")
